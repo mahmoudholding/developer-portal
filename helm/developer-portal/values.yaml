@@ -1,0 +1,73 @@
+# Default values for developer-portal.
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/mahmoudholding/developer-portal
+  pullPolicy: IfNotPresent
+  # Overridden by CI with sha-<short> tag
+  tag: "latest"
+
+imagePullSecrets:
+  - name: ghcr-pull-secret
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+  hosts:
+    - host: developer.glorylabs.nl
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: developer-glorylabs-nl-tls
+      hosts:
+        - developer.glorylabs.nl
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 32Mi
+  limits:
+    cpu: 100m
+    memory: 64Mi
+
+# No liveness/readiness probe needed for a static nginx site,
+# but included for k3s best-practice compliance.
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 30
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 3
+  periodSeconds: 10
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsNonRoot: false  # nginx:alpine requires root to bind port 80
+
+securityContext: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
