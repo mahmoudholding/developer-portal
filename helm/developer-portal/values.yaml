@@ -3,7 +3,7 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/mahmoudholding/developer-portal
+  repository: ghcr.io/theroomyapp/developer-portal/web
   pullPolicy: IfNotPresent
   # Overridden by CI with sha-<short> tag
   tag: "latest"
